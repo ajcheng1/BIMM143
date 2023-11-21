@@ -1,0 +1,63 @@
+---
+title: "HW Class 6: R Functions"
+author: "Alvin Cheng (A16840171)"
+format: pdf
+---
+
+#Write a function: See Q6 of the hands-on lab supplement above. This entails turning a supplied code snippet into a more robust and re-usable function that will take any of the three listed input proteins and plot the effect of drug binding. Note assessment rubric and submission instructions within document.
+
+```{r}
+#install.packages("bio3d")
+#library("bio3d")
+```
+
+
+```{r}
+library(bio3d)
+s1 <- read.pdb("4AKE") # kinase with drug
+s2 <- read.pdb("1AKE") # kinase no drug
+s3 <- read.pdb("1E4Y") # kinase with drug
+s1.chainA <- trim.pdb(s1, chain="A", elety="CA")
+s2.chainA <- trim.pdb(s2, chain="A", elety="CA")
+s3.chainA <- trim.pdb(s1, chain="A", elety="CA")
+s1.b <- s1.chainA$atom$b
+s2.b <- s2.chainA$atom$b
+s3.b <- s3.chainA$atom$b
+plotb3(s1.b, sse=s1.chainA, typ="l", ylab="Bfactor")
+plotb3(s2.b, sse=s2.chainA, typ="l", ylab="Bfactor")
+plotb3(s3.b, sse=s3.chainA, typ="l", ylab="Bfactor")
+```
+
+
+
+>Q6. How would you generalize the original code above to work with any set of input
+protein structures?
+
+
+```{r}
+library(bio3d)
+
+generate_Bfactor_plot <- function(protein_pdb) {
+  # Load the PDB file
+  read_pdb <- read.pdb(protein_pdb)
+  
+  # Trim the PDB, keeping the structure of chain A and alpha carbons (CA)
+  chain <- trim.pdb(read_pdb, chain = "A", elety = "CA")
+  
+  # Extract the "B-factor" from the chain
+  read_pdb.b <- chain$atom$b
+  
+  # Create a B-factor plot as a line plot with annotations of secondary structure elements (SSE)
+  plotb3(read_pdb.b, sse = chain, typ = "l", ylab = "Bfactor")
+}
+
+# Example usage:
+generate_Bfactor_plot("4AKE")  # Replace with the PDB file name of your choice
+
+```
+
+Documentation:
+This function reads a PDB file and creates a B-factor plot for the protein structure using the bio3D library. 
+
+An identifer, representing a protein, in the PDB database is inputted into the function. You can call the function by typing `generate_Bfactor_plot(___)` with the underlines replaced with the desired input (i.e. "1AKE"). The output should be a b-factor plot with Bfactor graphed on the y-axis and residue graphed on the x-axis. 
+
