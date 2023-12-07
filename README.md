@@ -1,4 +1,4 @@
-# BIMM143
+# BIMM143 Bioinformatics
 Classwork for Fall 2023 [BIMM 143](https://bioboot.github.io/bimm143_F23/) - Professor Barry Grant @ UC San Diego...
 
 You may have to download the pdf for it to be viewable 
