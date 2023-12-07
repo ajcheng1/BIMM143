@@ -1,0 +1,159 @@
+---
+title: "Structural Bioinformatics (Pt 1)"
+author: "Alvin Cheng (A16840171)"
+format: pdf
+---
+
+The PDB archive is the major repository of information about the 3D structures of large biological molecules, including proteins and nucleic acids. Understanding the shape of these molecules helps to understand how they work. This knowledge can be used to help deduce a structure’s role in human health and disease, and in drug development. The structures in the PDB range from tiny proteins and bits of DNA or RNA to complex molecular machines like the ribosome composed of many chains of protein and RNA.
+
+# The PDB database
+
+First let's see what is in the PDF database - the main repository of protein structures
+
+Downloaded composition stats from https://tinyurl.com/statspdb 
+
+```{r}
+stats <- read.csv("PDBstats.csv", row.names = 1)
+stats
+```
+There is a problem above due to the commas in the numer. This causes R to treat them as characters. 
+
+```{r}
+stats$X.ray
+```
+
+
+Removing the comma from the dataset by using `gsub()` to replace commas. We use `lapply()` to apply `gsub()` to each column:
+```{r}
+#stats <- as.data.frame(lapply(stats, function(x) gsub(",", "", x)))
+#stats
+```
+
+Here is another way to remove the commas using a function
+```{r}
+rm.comma <- function(x) {
+  as.numeric(gsub(",", "",x)) 
+}
+
+```
+
+I can use `apply()` to fix the whole table...
+```{r}
+pdbstats <- apply(stats, 2, rm.comma)
+rownames(pdbstats) <- rownames(stats)
+head(pdbstats)
+```
+
+
+> Q1: What percentage of structures in the PDB are solved by X-Ray and Electron Microscopy.
+
+```{r}
+total <- apply(pdbstats,2,sum)
+total
+```
+```{r}
+round(total/total["Total"] * 100, 2)
+```
+
+
+
+
+> Q2: What proportion of structures in the PDB are protein?
+
+```{r}
+round(pdbstats[1,"Total"] / sum(pdbstats[,"Total"]) * 100, 2)
+
+round(pdbstats[,"Total"] / sum(pdbstats[,"Total"]) * 100, 2) 
+```
+
+
+
+> Q3: Type HIV in the PDB website search box on the home page and determine how many HIV-1 protease structures are in the current PDB?
+
+skipped because of time constraints 
+
+
+>Q4: Water molecules normally have 3 atoms. Why do we see just one atom per water molecule in this structure?
+
+This is a 2 Angstrom structure and hydrogen is not visible at this resolution. You need 1 Angstrom or better to be able to see such small atoms like hydrogen
+
+
+>Q5: There is a critical “conserved” water molecule in the binding site. Can you identify this water molecule? What residue number does this water molecule have
+
+Water HOH 308
+
+>Q6: Generate and save a figure clearly showing the two distinct chains of HIV-protease along with the ligand. You might also consider showing the catalytic residues ASP 25 in each chain and the critical water (we recommend “Ball & Stick” for these side-chains). Add this figure to your Quarto document.
+
+
+![Here is a figure of HIP-Pr with the catalytic ASP residues, the MK1 compound and the all important water 308](1HSG (2).png)
+
+Another perspective of it  
+
+![Another picture of the water](1HSG (3).png)
+
+
+One more picture!
+
+![Uno Mas!](1HSG (4).png)
+
+
+
+## The bio3d package for structural bioinformatics 
+
+```{r}
+library(bio3d)
+
+pdb <- read.pdb("1hsg")
+pdb
+```
+```{r}
+head(pdb$atom)
+```
+
+# Predicting functional motions of a single structure
+
+Let's finish ttoday with a bioinformatics calculation to predict the functional motions of a PDB structure.
+
+```{r}
+adk <- read.pdb("6s36")
+adk
+```
+
+```{r}
+m <- nma(adk)
+```
+
+
+```{r}
+plot(m)
+mktrj(m, file="adk_m7.pdb")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
