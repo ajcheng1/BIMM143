@@ -1,0 +1,219 @@
+---
+title: "Class06: R Functions"
+author: "Alvin Cheng (A16840171)"
+format: pdf
+---
+#All about functions in R
+
+Functions are the way we get stuff done in R. We call a function to read data, compute stuff, plot stuff, etc. etc. 
+
+R makes writing functions accessible but we should always start by trying to get a working snippet of code first before we write out function. 
+
+## Today lab
+
+We will grade a whole class of student assignments. We will always try to start with a simplified version of the problem. 
+
+
+```{r}
+# Example input vectors to start with
+student1 <- c(100, 100, 100, 100, 100, 100, 100, 90)
+student2 <- c(100, NA, 90, 90, 90, 90, 97, 80)
+student3 <- c(90, NA, NA, NA, NA, NA, NA, NA)
+```
+
+If we want the average we can use the `mean()` function 
+```{r}
+avg_score = mean(student1) 
+avg_score
+```
+
+Let's be nice instructors and drop the lowest score so the answer here should be 100.
+
+I found the `which.min()` function that may be useful here. How does it work? Let's just try it:
+
+```{r}
+student1
+which.min(student1)
+```
+`which.min` gives you the position of the lowest score
+
+```{r}
+student1
+min(student1)
+```
+`min()` gives you the lowest score 
+
+Putting a minus side in front should eliminate the lowest score. I can use the minus syntax trick to get everything but the element with the min value. 
+
+```{r}
+student1[-8] 
+student1[-which.min(student1)]
+```
+
+This line of code below will give you the average of student 1 score after dropping the student's lowest score!
+```{r}
+mean(student1[-which.min(student1)])
+```
+
+Let's test on the other students
+```{r}
+mean(student2[-which.min(student2)])
+```
+
+where is the problem? Oh it is the the `mean()` with NA input returns NA by default but I can change this...
+```{r}
+student2
+mean(student2) # this produces an error
+mean(student2, na.rm=T) # this does not
+```
+
+
+```{r}
+student3
+which.min(student3)
+min(student3)
+mean(student3, na.rm=T)
+```
+No bueno. The student only submitted one of the homework and did not for the other yet the algorithim gave him a 90%! We need to fix this!
+
+I want stop working with `student1`, `student2`, etc and typing it out every time so let instead work with an input called `x`
+
+```{r}
+x = student2
+x
+```
+We want to overwrite the NA values with zero - if you miss a homework you score zero on this homework. 
+
+Bard has told me about the `is.na()` function to find the na vlaues. 
+```{r}
+x
+is.na(x)
+```
+We can use logicals to index a vector
+```{r}
+y = 1:5
+y
+y>3
+y[y>3]
+y[y>3] <- 100
+y
+```
+
+
+There are multiple ways to replace NA, but one way is showed! (Using bard)
+
+```{r}
+x <- replace(student2, is.na(student2), 0)
+x # in order not to overwrite student2, I used the variable x 
+# another way is here 
+x[is.na(x)] <- 0 
+x
+```
+
+Now let's find the average
+```{r}
+mean(x)
+```
+
+Let's do student 3. Keep in mind, there is another similar way to do this
+
+```{r}
+student3_drop <- replace(student3, is.na(student3), 0)
+student3_drop # replacing all NA with 0 
+#student3_replaced <- student3_drop[-which.min(student3_replaced)] # dropping the lowest value
+student3_replaced <- student3_drop[-which.min(student3_drop)] # dropping the lowest value
+avg_student3 <- mean(student3_replaced, na.rm=TRUE) # finding the average now 
+avg_student3
+```
+^^ This is my working snippet of code! 
+
+Q1. Write a function grade() to determine an overall grade from a vector of student homework assignment scores dropping the lowest single score. If a student misses a homework (i.e. has an NA value) this can be used as a score to be potentially dropped. Your final function should be adquately explained with code comments and be able to work on an example class gradebook such as this one in CSV format: “https://tinyurl.com/gradeinput” [3pts]
+
+```{r}
+grade <- function(x) {
+  # mask NA values to zero
+  x[ is.na(x)] <- 0 
+  # Drop the lowest score and get the mean 
+  mean ( x[-which.min(x)])
+}
+```
+
+Use this function: (Remember to run the code above first!)
+```{r}
+#this should run the function "grade" on the data of student 1-3
+grade(student1)
+grade(student2)
+grade(student3)
+```
+
+We need to read the gradebook for an overview of all the students' grades 
+```{r}
+gradebook <- read.csv("https://tinyurl.com/gradeinput", row.names=1) # reads the file
+gradebook
+```
+```{r}
+grades <- apply(gradebook,1,grade) # applies the grade function to each row 
+grades # displays the grades of all the students 
+```
+
+
+Q2. Using your grade() function and the supplied gradebook, Who is the top scoring student overall in the gradebook? [3pts]
+
+```{r}
+# Apply the `grade()` function to each row of the data frame
+grade_max <- apply(gradebook, 1, grade)
+#grade_max
+
+#an easier way   
+highest_scoring_student = which.max(grade_max)
+highest_scoring_student
+
+# Find the highest score
+#highest_score <- max(grade_max)
+
+# Find the student with the highest score
+#highest_scoring_student <- names(grade_max)[grade_max == highest_score]
+
+# Print the highest scoring student
+#print(highest_scoring_student)
+```
+
+Q3. From your analysis of the gradebook, which homework was toughest on students (i.e. obtained the lowest scores overall? [2pts]
+
+```{r}
+# Apply the `grade()` function to each row of the data frame
+grade_min <- apply(gradebook, 2, grade)
+grade_min
+which.min(grade_min)
+```
+
+Another way to do it
+```{r}
+mask <- gradebook
+mask[is.na(mask)] <- 0
+
+a <- apply(mask,2,mean)
+lowest_hw <- which.min(a)
+lowest_hw
+#which.min(apply(mask,2,mean))
+```
+
+
+
+
+Q4. Optional Extension: From your analysis of the gradebook, which homework was most predictive of overall score (i.e. highest correlation with average grade score)? [1pt]
+
+```{r}
+which.max(apply(mask,2,cor,y=grades))
+```
+
+
+
+
+
+
+
+
+
+
+

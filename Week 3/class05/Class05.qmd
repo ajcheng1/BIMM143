@@ -1,0 +1,206 @@
+---
+title: "Class 5 Data Visualization with ggplot2"
+author: "Alvin Cheng (PID A16840171)"
+format: pdf
+---
+
+## Using GGPLOT
+
+The ggplot2 package needs to be installed as it does not come with R "out of the box."
+
+We use the `install.packages()` function to do this.
+```{r}
+#install.packages("ggplot2")
+```
+
+to use ggplot I need to load it up before I can call any of the functions in the package. I do this with the `library()` function. 
+```{r}
+library(ggplot2)
+ggplot()
+```
+
+
+```{r}
+#I inputted this code just to view some of the data I want to plot 
+head(cars)
+```
+
+all ggplot figures have at least 3 things:
+- data (the stuff we want to plot)
+- aesthetic mapping (aes values)
+- geoms 
+
+```{r}
+ggplot(cars) +
+  aes(x=speed, y=dist) +
+  geom_point() 
+```
+
+
+```{r}
+ggplot(cars) +
+  aes(x=speed, y=dist) +
+  geom_point() +
+  geom_smooth()
+```
+
+
+```{r}
+ggplot(cars) + 
+  aes(x=speed, y=dist) + 
+  geom_point() + 
+  labs (title = "Speed vs Stopping Distances of Cars", x ="Speed (MPH)", y = "Stopping Distance (ft)", subtitle = "a scatter plot of data of stopping distance of cars at certain speeds", caption = "Dataset: 'automobiles'") + geom_smooth(method="lm", se=FALSE)  + 
+theme_bw()
+```
+
+ggplot is not the only graphing system in R. There are lots of others. There is even "base R" graphics. 
+
+```{r}
+plot(cars)
+```
+## Gene Expression Data
+
+```{r}
+url <- "https://bioboot.github.io/bimm143_S20/class-material/up_down_expression.txt"
+genes <- read.delim(url)
+head(genes)
+genes_in_set <- nrow(genes)
+genes_in_set
+colnames(genes)
+ncol(genes)
+table(genes[,"State"])
+round(table(genes[,"State"])/nrow(genes) * 100, 2)
+
+#From this dataset, we are going to make a scatter plot
+p = ggplot(genes) +
+  aes(x=Condition1, y=Condition2, col=State) + 
+  geom_point() + 
+    labs(title = "Gene Expression Changes Upon Drug Treatment", 
+         x ="Control (No Drug)", 
+         y = "Drug Treatment", 
+         subtitle = "a scatter plot of data of drugs", 
+         caption = "Dataset: 'drug data for pharma'") 
+#+  geom_smooth(method="lm", se=FALSE)  
+
+p + scale_colour_manual( values=c("blue","gray","red") )
+```
+
+## Going Further
+
+```{r}
+# File location online
+url <- "https://raw.githubusercontent.com/jennybc/gapminder/master/inst/extdata/gapminder.tsv"
+gapminder <- read.delim(url)
+library(dplyr)
+
+gapminder_2007 <- gapminder %>% filter(year==2007)
+ggplot(gapminder_2007) +
+  aes(x=gdpPercap, y=lifeExp) +
+  geom_point() + facet_wrap(~year)
+```
+
+```{r}
+ggplot(gapminder_2007) +
+  aes(x=gdpPercap, y=lifeExp, color=continent, size=pop) +
+  geom_point(alpha=0.5)
+```
+
+```{r}
+ggplot(gapminder_2007) + 
+  aes(x = gdpPercap, y = lifeExp, color = pop) +
+  geom_point(alpha=0.8)
+```
+
+```{r}
+gapminder_1957 = gapminder %>% filter(year==1957 | year == 2007) 
+
+ggplot(gapminder_1957) + 
+  geom_point(aes(x = gdpPercap, y = lifeExp,
+                 size = pop, color = continent), alpha=0.7) + 
+  scale_size_area(max_size = 15) + 
+  facet_wrap(~year)
+
+```
+
+## Bar Charts
+
+```{r}
+gapminder_top5 <- gapminder %>% 
+  filter(year==2007) %>% 
+  arrange(desc(pop)) %>% 
+  top_n(5, pop)
+
+gapminder_top5
+```
+
+```{r}
+ggplot(gapminder_top5) + 
+  geom_col(aes(x = country, y = pop))
+```
+
+```{r}
+ggplot(gapminder_top5) + 
+  geom_col(aes(x = country, y = lifeExp))
+```
+
+```{r}
+ggplot(gapminder_top5) +
+  aes(x=reorder(country, -pop), y=pop, fill=country) +
+  geom_col(col="gray30") +
+  guides(fill="none")
+```
+
+```{r}
+head(USArrests)
+
+```
+
+```{r}
+
+USArrests$State <- rownames(USArrests)
+ggplot(USArrests) +
+  aes(x=reorder(State,Murder), y=Murder) +
+  geom_col() +
+  coord_flip()
+```
+
+```{r}
+ggplot(USArrests) +
+  aes(x=reorder(State,Murder), y=Murder) +
+  geom_point() +
+  geom_segment(aes(x=State, 
+                   xend=State, 
+                   y=0, 
+                   yend=Murder), color="blue") +
+  coord_flip() 
+```
+
+## Below is some old stuff
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+This is some of my text. 
+
+```{r}
+log(100)
+```
+
+
+When you click the *Render* button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+plot(1:50)
+```
+
+You can add options to executable code like this 
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
