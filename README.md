@@ -9,6 +9,6 @@ You may have to download the pdf for it to be viewable
   
 - Class 07: [Machine Learning](https://github.com/ajcheng1/BIMM143/blob/main/Class07.md)
 
-
+- Class 13[DESeq Lab](https://github.com/ajcheng1/BIMM143/blob/main/Week%207/Lab%20Class13%20(DESeq%20lab)/Lab%20Class13%20(DESeq%20lab).md)
 
 
